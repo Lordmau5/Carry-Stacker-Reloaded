@@ -100,6 +100,7 @@ function PlayerManager:set_carry( ... )
   local cdata = self:get_my_carry_data()
   weight = weight * BLT_CarryStacker:getWeightForType(cdata.carry_id)
 	table.insert(stack_table, cdata)
+	PlayerStandard:block_use_item()
 
 	self:refresh_stack_counter()
 end
