@@ -21,10 +21,10 @@ function PlayerManager:can_carry(carry_id)
 		return master_PlayerManager_can_carry(self, carry_id)
 	end
 
-    local check_weight = PlayerManager:BLTCS_getCurrentWeight() * BLT_CarryStacker:getWeightForType(carry_id)
-    if check_weight < 0.25 then
-        return false
-    end
+  local check_weight = PlayerManager:BLTCS_getCurrentWeight() * BLT_CarryStacker:getWeightForType(carry_id)
+  if check_weight < 0.25 then
+      return false
+  end
 
 	return true
 end
@@ -33,8 +33,8 @@ local drop_all_carry_args = nil
 
 function resetVars()
 	weight = 1
-    drop_all_carry_args = nil
-    nextUpdate = nil
+  drop_all_carry_args = nil
+  nextUpdate = nil
 end
 
 local lastUpdate, nextUpdate
@@ -59,23 +59,23 @@ function drop_and_set_carry(self, ...)
 
 	if #stack_table > 0 then
 		if stack_table[#stack_table] ~= nil then
-            local cdata = stack_table[#stack_table]
-            weight = weight / BLT_CarryStacker:getWeightForType(cdata.carry_id)
+      local cdata = stack_table[#stack_table]
+      weight = weight / BLT_CarryStacker:getWeightForType(cdata.carry_id)
 
-            master_PlayerManager_drop_carry(self, ...)
+      master_PlayerManager_drop_carry(self, ...)
 
 			table.remove(stack_table, #stack_table)
-            if #stack_table > 0 then
-                cdata = stack_table[#stack_table]
-                master_PlayerManager_set_carry(self, cdata.carry_id, cdata.multiplier or 100, cdata.dye_initiated, cdata.has_dye_pack, cdata.dye_value_multiplier)
+	    if #stack_table > 0 then
+        cdata = stack_table[#stack_table]
+        master_PlayerManager_set_carry(self, cdata.carry_id, cdata.multiplier or 100, cdata.dye_initiated, cdata.has_dye_pack, cdata.dye_value_multiplier)
 
-                nextUpdate = lastUpdate + 0.1
-            else
-                weight = 1
-                resetVars()
-            end
+        nextUpdate = lastUpdate + 0.1
+	    else
+        weight = 1
+        resetVars()
+	    end
 
-            self:refresh_stack_counter()
+	    self:refresh_stack_counter()
 		end
 	end
 end
@@ -96,14 +96,15 @@ function PlayerManager:set_carry( ... )
 	end
 
 	master_PlayerManager_set_carry(self, ...)
-	
-    local cdata = self:get_my_carry_data()
-    weight = weight * BLT_CarryStacker:getWeightForType(cdata.carry_id)
+
+  local cdata = self:get_my_carry_data()
+  weight = weight * BLT_CarryStacker:getWeightForType(cdata.carry_id)
 	table.insert(stack_table, cdata)
+	PlayerStandard:block_use_item()
 
 	self:refresh_stack_counter()
 end
 
 function PlayerManager:BLTCS_getCurrentWeight()
-    return weight
+  return weight
 end
