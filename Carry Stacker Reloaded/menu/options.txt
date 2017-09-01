@@ -1,6 +1,6 @@
 {
 	"menu_id" : "bltcs_options_menu",
-	"parent_menu_id" : "lua_mod_options_menu",
+	"parent_menu_id" : "blt_options",
 	"title" : "bltcs_options_menu_title",
 	"description" : "bltcs_options_menu_desc",
 	"focus_changed_callback" : "BLT_CarryStacker_Open_Options",
