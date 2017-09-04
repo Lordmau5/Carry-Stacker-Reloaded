@@ -2,10 +2,11 @@
     "name" : "Carry Stacker Reloaded",
     "description" : "Carry Stacker Reloaded - Now both nerfed and better at the same time!",
     "author" : "Lordmau5 and enragedpixel",
-    "version": "6",
+    "version": "7",
+    "blt_version" : 2,
     "updates" : [
         {
-            "revision" : 6,
+            "revision" : 7,
             "identifier" : "BLTCS_Reloaded"
         }
     ],
@@ -16,7 +17,7 @@
         },
 		{
             "hook_id": "lib/managers/menumanager",
-            "script_path": "lua/configuration_menu.lua",
+            "script_path": "lua/configuration_menu.lua"
         },
         {
             "hook_id" : "lib/managers/playermanager",
