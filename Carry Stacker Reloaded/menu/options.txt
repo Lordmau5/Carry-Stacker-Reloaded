@@ -9,7 +9,7 @@
 		{
 			"type" : "button",
 			"id" : "bltcs_button_help",
-			"title" : "bltcs_button_help_title"
+			"title" : "bltcs_button_help_title",
 			"description" : "bltcs_button_help_desc",
 			"callback" : "BLT_CarryStacker_Help",
 		},
