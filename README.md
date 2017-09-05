@@ -36,7 +36,7 @@ Thanks to TdlQ for the awesome code :)
 *I know, I've used the PP trainer in this... But that's the only good way to debug things and to show off features real quick.*
 
 # Download:  
-http://download.paydaymods.com/download/latest/BLTCS_Reloaded
+https://github.com/enragedpixel/Carry-Stacker-Reloaded/
 
 # Changelog:  
 - **R7**: BLT 2.0 Compatibility
