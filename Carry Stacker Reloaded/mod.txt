@@ -1,8 +1,8 @@
 {
     "name" : "Carry Stacker Reloaded",
     "description" : "Carry Stacker Reloaded - Now both nerfed and better at the same time!",
-    "author" : "Lordmau5 and enragedpixel",
-    "version": "7",
+    "author" : "Lordmau5, enragedpixel, theo-ardouin",
+    "version": "8",
     "blt_version" : 2,
     "updates" : [
         {

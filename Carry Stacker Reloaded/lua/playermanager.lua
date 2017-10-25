@@ -21,12 +21,13 @@ function PlayerManager:can_carry(carry_id)
 		return master_PlayerManager_can_carry(self, carry_id)
 	end
 
-  local check_weight = PlayerManager:BLTCS_getCurrentWeight() * BLT_CarryStacker:getWeightForType(carry_id)
-  if check_weight < 0.25 then
-      return false
-  end
+	local check_weight = PlayerManager:BLTCS_getCurrentWeight() * BLT_CarryStacker:getWeightForType(carry_id)
 
-	return true
+	if BLT_CarryStacker:IsStealthOnly() and not managers.groupai:state():whisper_mode() and self:is_carrying() then
+		return false
+	end
+
+	return check_weight >= 0.25
 end
 
 local drop_all_carry_args = nil
@@ -67,11 +68,10 @@ function drop_and_set_carry(self, ...)
 			table.remove(stack_table, #stack_table)
 	    if #stack_table > 0 then
         cdata = stack_table[#stack_table]
-        master_PlayerManager_set_carry(self, cdata.carry_id, cdata.multiplier or 100, cdata.dye_initiated, cdata.has_dye_pack, cdata.dye_value_multiplier)
+        master_PlayerManager_set_carry(self, cdata.carry_id, cdata.multiplier or 1, cdata.dye_initiated, cdata.has_dye_pack, cdata.dye_value_multiplier)
 
         nextUpdate = lastUpdate + 0.1
 	    else
-        weight = 1
         resetVars()
 	    end
 
