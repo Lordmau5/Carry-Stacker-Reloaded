@@ -3,6 +3,9 @@ BLT_CarryStacker._path = ModPath
 BLT_CarryStacker._data_path = SavePath .. "carrystacker.txt"
 BLT_CarryStacker.settings = {}
 
+BLT_CarryStacker.weight = 1
+BLT_CarryStacker.stack = {}
+
 function val2bool(value)
 	return value == "on" and true or false
 end
@@ -86,11 +89,29 @@ function BLT_CarryStacker:getWeightForType(carry_id)
 end
 
 function BLT_CarryStacker:IsModEnabled()
+	if not LuaNetworking:IsHost() then
+		return false
+	end
 	if self:IsOfflineOnly() and not Global.game_settings.single_player then
 		return false
 	end
+	-- Able to drop loot even if stealth failed
+	if self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack > 0 then
+		return true
+	-- Unable to use the mod after every item was dropped if stealth-only and stealth failed
+	elseif self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack == 0 then
+		return false
+	end
+	return true
+end
 
-	return LuaNetworking:IsHost()
+function BLT_CarryStacker:CanCarry(carry_id)
+	local check_weight = self.weight * self:getWeightForType(carry_id)
+	-- Unable to pick up loot after stealth-only in case of alarm
+	if self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack > 0 then
+		return false
+	end
+	return check_weight >= 0.25
 end
 
 function BLT_CarryStacker:IsHostSyncEnabled()

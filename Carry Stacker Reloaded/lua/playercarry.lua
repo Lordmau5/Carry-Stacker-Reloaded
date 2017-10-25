@@ -5,10 +5,8 @@ function PlayerCarry:_perform_jump(jump_vec)
 		return
 	end
 
-	local penalty = PlayerManager:BLTCS_getCurrentWeight()
-	if managers.player:has_category_upgrade("carry", "movement_penalty_nullifier") then
-	else
-		mvector3.multiply(jump_vec, penalty)
+	if not managers.player:has_category_upgrade("carry", "movement_penalty_nullifier") then
+		mvector3.multiply(jump_vec, BLT_CarryStacker.weight)
 	end
 
 	PlayerCarry.super._perform_jump(self, jump_vec)
@@ -20,7 +18,7 @@ function PlayerCarry:_get_max_walk_speed(...)
 		return master_PlayerCarry_get_max_walk_speed(self, ...)
 	end
 
-	local penalty = PlayerManager:BLTCS_getCurrentWeight()
+	local penalty = BLT_CarryStacker.weight
 	if managers.player:has_category_upgrade("carry", "movement_penalty_nullifier") then
 		penalty = 1
 	else
@@ -36,8 +34,7 @@ function PlayerCarry:_get_walk_headbob(...)
 		return master_PlayerCarry_get_walk_headbob(self, ...)
 	end
 
-	local penalty = PlayerManager:BLTCS_getCurrentWeight()
-	return PlayerCarry.super._get_walk_headbob(self, ...) * penalty
+	return PlayerCarry.super._get_walk_headbob(self, ...) * BLT_CarryStacker.weight
 end
 
 local master_PlayerCarry_check_action_run = PlayerCarry._check_action_run
@@ -47,8 +44,7 @@ function PlayerCarry:_check_action_run(...)
 		return
 	end
 
-	local penalty = PlayerManager:BLTCS_getCurrentWeight()
-	if penalty >= 0.75 or managers.player:has_category_upgrade("carry", "movement_penalty_nullifier") then
+	if BLT_CarryStacker.weight >= 0.75 or managers.player:has_category_upgrade("carry", "movement_penalty_nullifier") then
 		PlayerCarry.super._check_action_run(self, ...)
 	end
 end
