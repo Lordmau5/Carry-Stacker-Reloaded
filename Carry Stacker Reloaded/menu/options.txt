@@ -11,12 +11,12 @@
 			"id" : "bltcs_button_help",
 			"title" : "bltcs_button_help_title",
 			"description" : "bltcs_button_help_desc",
-			"callback" : "BLT_CarryStacker_Help",
+			"callback" : "BLT_CarryStacker_Help"
 		},
 
 		{
 			"type" : "divider",
-			"size" : 20,
+			"size" : 20
 		},
 
 		{
@@ -29,7 +29,7 @@
 			"default_value" : 10,
 			"min" : 0,
 			"max" : 50,
-			"step" : 1,
+			"step" : 1
 		},
 		{
 			"type" : "slider",
@@ -41,7 +41,7 @@
 			"default_value" : 20,
 			"min" : 0,
 			"max" : 50,
-			"step" : 1,
+			"step" : 1
 		},
 		{
 			"type" : "slider",
@@ -53,7 +53,7 @@
 			"default_value" : 30,
 			"min" : 0,
 			"max" : 50,
-			"step" : 1,
+			"step" : 1
 		},
 		{
 			"type" : "slider",
@@ -65,7 +65,7 @@
 			"default_value" : 40,
 			"min" : 0,
 			"max" : 50,
-			"step" : 1,
+			"step" : 1
 		},
 		{
 			"type" : "slider",
@@ -77,12 +77,12 @@
 			"default_value" : 50,
 			"min" : 0,
 			"max" : 50,
-			"step" : 1,
+			"step" : 1
 		},
 
 		{
 			"type" : "divider",
-			"size" : 20,
+			"size" : 20
 		},
 
 		{
@@ -92,15 +92,32 @@
 			"description" : "bltcs_toggle_host_sync_desc",
 			"callback" : "BLT_CarryStacker_toggleHostSync",
 			"value" : "toggle_host",
-			"default_value" : true,
+			"default_value" : true
 		},
-
+		{
+			"type" : "toggle",
+			"id" : "bltcs_stealth_only",
+			"title" : "bltcs_toggle_stealth_only_title",
+			"description" : "bltcs_toggle_stealth_only_desc",
+			"callback" : "BLT_CarryStacker_toggleStealthOnly",
+			"value" : "toggle_stealth",
+			"default_value" : false
+		},
+		{
+			"type" : "toggle",
+			"id" : "bltcs_offline_only",
+			"title" : "bltcs_toggle_offline_only_title",
+			"description" : "bltcs_toggle_offline_only_desc",
+			"callback" : "BLT_CarryStacker_toggleOfflineOnly",
+			"value" : "toggle_offline",
+			"default_value" : false
+		},
 		{
 			"type" : "button",
 			"id" : "bltcs_button_reset",
 			"title" : "bltcs_button_reset_title",
 			"description" : "bltcs_button_reset_desc",
-			"callback" : "BLT_CarryStacker_Reset",
+			"callback" : "BLT_CarryStacker_Reset"
 		}
 	]
 }

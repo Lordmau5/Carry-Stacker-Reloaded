@@ -3,6 +3,13 @@ BLT_CarryStacker._path = ModPath
 BLT_CarryStacker._data_path = SavePath .. "carrystacker.txt"
 BLT_CarryStacker.settings = {}
 
+BLT_CarryStacker.weight = 1
+BLT_CarryStacker.stack = {}
+
+function val2bool(value)
+	return value == "on" and true or false
+end
+
 function BLT_CarryStacker:Load()
 	self:ResetWeights()
 
@@ -50,6 +57,8 @@ function BLT_CarryStacker:getCompleteTable()
 		tbl[i] = v
 	end
 	tbl["toggle_host"] = BLT_CarryStacker.settings["toggle_host"]
+	tbl["toggle_stealth"] = BLT_CarryStacker.settings["toggle_stealth"]
+	tbl["toggle_offline"] = BLT_CarryStacker.settings["toggle_offline"]
 	return tbl
 end
 
@@ -66,6 +75,8 @@ function BLT_CarryStacker:ResetWeights()
 		["slightly_very_heavy"] = 30
 	}
 	self.settings["toggle_host"] = true
+	self.settings["toggle_stealth"] = false
+	self.settings["toggle_offline"] = false
 	self.movement_penalties_server = {}
 end
 
@@ -78,19 +89,29 @@ function BLT_CarryStacker:getWeightForType(carry_id)
 end
 
 function BLT_CarryStacker:IsModEnabled()
-	if not LuaNetworking:IsMultiplayer() then return true end
-
-	if LuaNetworking:IsHost() then return true end
-
-	return BLT_CarryStacker.enabled
+	if not LuaNetworking:IsHost() then
+		return false
+	end
+	if self:IsOfflineOnly() and not Global.game_settings.single_player then
+		return false
+	end
+	-- Able to drop loot even if stealth failed
+	if self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack > 0 then
+		return true
+	-- Unable to use the mod after every item was dropped if stealth-only and stealth failed
+	elseif self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack == 0 then
+		return false
+	end
+	return true
 end
 
-function BLT_CarryStacker:EnableMod()
-	BLT_CarryStacker.enabled = true
-end
-
-function BLT_CarryStacker:DisableMod()
-	BLT_CarryStacker.enabled = false
+function BLT_CarryStacker:CanCarry(carry_id)
+	local check_weight = self.weight * self:getWeightForType(carry_id)
+	-- Unable to pick up loot after stealth-only in case of alarm
+	if self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack > 0 then
+		return false
+	end
+	return check_weight >= 0.25
 end
 
 function BLT_CarryStacker:IsHostSyncEnabled()
@@ -107,6 +128,22 @@ end
 
 function BLT_CarryStacker:SetHostSyncEnabled(state)
 	BLT_CarryStacker.settings["toggle_host"] = state
+end
+
+function BLT_CarryStacker:SetStealthOnlyEnabled(state)
+	BLT_CarryStacker.settings["toggle_stealth"] = state
+end
+
+function BLT_CarryStacker:IsStealthOnly()
+	return BLT_CarryStacker.settings["toggle_stealth"]
+end
+
+function BLT_CarryStacker:SetOfflineOnlyEnabled(state)
+	BLT_CarryStacker.settings["toggle_offline"] = state
+end
+
+function BLT_CarryStacker:IsOfflineOnly()
+	return BLT_CarryStacker.settings["toggle_offline"]
 end
 
 Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInit_BLT_CarryStacker", function(loc)
@@ -163,12 +200,20 @@ Hooks:Add("MenuManagerInitialize", "MenuManagerInitialize_BLT_CarryStacker", fun
 	end
 
 	MenuCallbackHandler.BLT_CarryStacker_toggleHostSync = function(this, item)
-		BLT_CarryStacker:SetHostSyncEnabled((item:value() == "on" and true or false))
+		BLT_CarryStacker:SetHostSyncEnabled(val2bool(item:value()))
 
 		if BLT_CarryStacker:IsHostSyncEnabled() and LuaNetworking:IsMultiplayer() and LuaNetworking:IsHost() then
 			LuaNetworking:SendToPeers("BLT_CarryStacker_AllowMod", BLT_CarryStacker:IsHostSyncEnabled())
 			BLT_CarryStacker:syncConfigToAll()
 		end
+	end
+
+	MenuCallbackHandler.BLT_CarryStacker_toggleStealthOnly = function(this, item)
+		BLT_CarryStacker:SetStealthOnlyEnabled(val2bool(item:value()))
+	end
+
+	MenuCallbackHandler.BLT_CarryStacker_toggleOfflineOnly = function(this, item)
+		BLT_CarryStacker:SetOfflineOnlyEnabled(val2bool(item:value()))
 	end
 
 	MenuCallbackHandler.BLT_CarryStacker_Help = function(this, item)

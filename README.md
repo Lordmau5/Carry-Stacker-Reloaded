@@ -38,7 +38,8 @@ Thanks to TdlQ for the awesome code :)
 # Download:  
 https://github.com/enragedpixel/Carry-Stacker-Reloaded/
 
-# Changelog:  
+# Changelog:
+- **R8**: _Offline Only_ and _Stealth Only_ features
 - **R7**: BLT 2.0 Compatibility
 - **R6**: Fix for not being able to properly play the game online (WHO WOULD WANT TO DO SUCH A THING ANYWAY, AM I RIGHT GUYS?... guys...?)  
 

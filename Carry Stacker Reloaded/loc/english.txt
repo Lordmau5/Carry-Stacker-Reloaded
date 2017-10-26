@@ -14,6 +14,12 @@
 	"bltcs_toggle_host_sync_title" : "[HOST] Sync Settings with Clients",
 	"bltcs_toggle_host_sync_desc" : "Send your settings over to the other players if you are the host",
 
+	"bltcs_toggle_stealth_only_title" : "Stealth only",
+	"bltcs_toggle_stealth_only_desc" : "Allows only in stealth mode",
+
+	"bltcs_toggle_offline_only_title" : "Offline only",
+	"bltcs_toggle_offline_only_desc" : "Allows only in offline mode",
+
 
 	"bltcs_slider_light_title" : "Light Bags",
 	"bltcs_slider_light_desc" : "Define the movement penalty for Light bags",
