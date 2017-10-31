@@ -5,9 +5,10 @@ BLT_CarryStacker.settings = {}
 
 BLT_CarryStacker.weight = 1
 BLT_CarryStacker.stack = {}
+BLT_CarryStacker.enabled = true
 
 function val2bool(value)
-	return value == "on" and true or false
+	return value == "on"
 end
 
 function BLT_CarryStacker:Load()
@@ -53,12 +54,12 @@ end
 
 function BLT_CarryStacker:getCompleteTable()
 	local tbl = {}
-	for i, v in pairs(BLT_CarryStacker.settings.movement_penalties) do
+	for i, v in pairs(self.settings.movement_penalties) do
 		tbl[i] = v
 	end
-	tbl["toggle_host"] = BLT_CarryStacker.settings["toggle_host"]
-	tbl["toggle_stealth"] = BLT_CarryStacker.settings["toggle_stealth"]
-	tbl["toggle_offline"] = BLT_CarryStacker.settings["toggle_offline"]
+	tbl["toggle_host"] = self.settings["toggle_host"]
+	tbl["toggle_stealth"] = self.settings["toggle_stealth"]
+	tbl["toggle_offline"] = self.settings["toggle_offline"]
 	return tbl
 end
 
@@ -82,68 +83,93 @@ end
 
 function BLT_CarryStacker:getWeightForType(carry_id)
 	local carry_type = tweak_data.carry[carry_id].type
-	if LuaNetworking:IsMultiplayer() and not LuaNetworking:IsHost() and BLT_CarryStacker:IsRemoteHostSyncEnabled() then
+	if LuaNetworking:IsMultiplayer() and not LuaNetworking:IsHost() and self:IsRemoteHostSyncEnabled() then
 		return self.movement_penalties_server[carry_type] ~= nil and ((100 - self.movement_penalties_server[carry_type]) / 100) or 1
 	end
 	return self.settings.movement_penalties[carry_type] ~= nil and ((100 - self.settings.movement_penalties[carry_type]) / 100) or 1
 end
 
+function BLT_CarryStacker:EnableMod()
+	self.enabled = true
+end
+
+function BLT_CarryStacker:DisableMod()
+	self.enabled = false
+end
+
 function BLT_CarryStacker:IsModEnabled()
-	if not LuaNetworking:IsHost() then
-		return false
-	end
+	-- Unable to use if online and offline only is toggled
 	if self:IsOfflineOnly() and not Global.game_settings.single_player then
 		return false
 	end
-	-- Able to drop loot even if stealth failed
+	-- Able to drop loot even if stealth failed on stealth-only
 	if self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack > 0 then
 		return true
 	-- Unable to use the mod after every item was dropped if stealth-only and stealth failed
 	elseif self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack == 0 then
 		return false
 	end
-	return true
+	return self.enabled
+end
+
+function BLT_CarryStacker:SetSettingEnabled(setting_id, state)
+	self.settings[setting_id] = state
+end
+
+function BLT_CarryStacker:SetRemoteHostSyncEnabled(state)
+	self.remote_host_sync = state
+end
+
+function BLT_CarryStacker:IsRemoteHostSyncEnabled()
+	return self.remote_host_sync
+end 
+
+function BLT_CarryStacker:IsHostSyncEnabled()
+	return self.settings["toggle_host"]
+end
+
+function BLT_CarryStacker:IsStealthOnly()
+	return self.settings["toggle_stealth"]
+end
+
+function BLT_CarryStacker:IsOfflineOnly()
+	return self.settings["toggle_offline"]
 end
 
 function BLT_CarryStacker:CanCarry(carry_id)
 	local check_weight = self.weight * self:getWeightForType(carry_id)
-	-- Unable to pick up loot after stealth-only in case of alarm
+	-- Unable to pick up more loot using stealth-only in case of alarm
 	if self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack > 0 then
 		return false
 	end
 	return check_weight >= 0.25
 end
 
-function BLT_CarryStacker:IsHostSyncEnabled()
-	return BLT_CarryStacker.settings["toggle_host"]
+function BLT_CarryStacker:AddCarry(cdata)
+	self.weight = self.weight * self:getWeightForType(cdata.carry_id)
+	table.insert(self.stack, cdata)
+	self:HudRefresh()
 end
 
-function BLT_CarryStacker:SetRemoteHostSyncEnabled(state)
-	BLT_CarryStacker.remote_host_sync = state
+function BLT_CarryStacker:RemoveCarry()
+	if #self.stack == 0 then
+		return nil
+	end
+	local cdata = self.stack[#self.stack]
+	self.weight = self.weight / self:getWeightForType(cdata.carry_id)
+	table.remove(self.stack, #self.stack)
+	if #self.stack == 0 then
+		self.weight = 1
+	end
+	self:HudRefresh()
+	return cdata
 end
 
-function BLT_CarryStacker:IsRemoteHostSyncEnabled()
-	return BLT_CarryStacker.remote_host_sync
-end 
-
-function BLT_CarryStacker:SetHostSyncEnabled(state)
-	BLT_CarryStacker.settings["toggle_host"] = state
-end
-
-function BLT_CarryStacker:SetStealthOnlyEnabled(state)
-	BLT_CarryStacker.settings["toggle_stealth"] = state
-end
-
-function BLT_CarryStacker:IsStealthOnly()
-	return BLT_CarryStacker.settings["toggle_stealth"]
-end
-
-function BLT_CarryStacker:SetOfflineOnlyEnabled(state)
-	BLT_CarryStacker.settings["toggle_offline"] = state
-end
-
-function BLT_CarryStacker:IsOfflineOnly()
-	return BLT_CarryStacker.settings["toggle_offline"]
+function BLT_CarryStacker:HudRefresh()
+	managers.hud:remove_special_equipment("carrystacker")
+	if #self.stack > 0 then
+		managers.hud:add_special_equipment({id = "carrystacker", icon = "pd2_loot", amount = #self.stack})
+	end
 end
 
 Hooks:Add("LocalizationManagerPostInit", "LocalizationManagerPostInit_BLT_CarryStacker", function(loc)
@@ -200,7 +226,7 @@ Hooks:Add("MenuManagerInitialize", "MenuManagerInitialize_BLT_CarryStacker", fun
 	end
 
 	MenuCallbackHandler.BLT_CarryStacker_toggleHostSync = function(this, item)
-		BLT_CarryStacker:SetHostSyncEnabled(val2bool(item:value()))
+		BLT_CarryStacker:SetSettingEnabled("toggle_host", val2bool(item:value()))
 
 		if BLT_CarryStacker:IsHostSyncEnabled() and LuaNetworking:IsMultiplayer() and LuaNetworking:IsHost() then
 			LuaNetworking:SendToPeers("BLT_CarryStacker_AllowMod", BLT_CarryStacker:IsHostSyncEnabled())
@@ -209,11 +235,11 @@ Hooks:Add("MenuManagerInitialize", "MenuManagerInitialize_BLT_CarryStacker", fun
 	end
 
 	MenuCallbackHandler.BLT_CarryStacker_toggleStealthOnly = function(this, item)
-		BLT_CarryStacker:SetStealthOnlyEnabled(val2bool(item:value()))
+		BLT_CarryStacker:SetSettingEnabled("toggle_stealth", val2bool(item:value()))
 	end
 
 	MenuCallbackHandler.BLT_CarryStacker_toggleOfflineOnly = function(this, item)
-		BLT_CarryStacker:SetOfflineOnlyEnabled(val2bool(item:value()))
+		BLT_CarryStacker:SetSettingEnabled("toggle_offline", val2bool(item:value()))
 	end
 
 	MenuCallbackHandler.BLT_CarryStacker_Help = function(this, item)
