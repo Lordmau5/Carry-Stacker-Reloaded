@@ -5,7 +5,7 @@ BLT_CarryStacker.settings = {}
 
 BLT_CarryStacker.weight = 1
 BLT_CarryStacker.stack = {}
-BLT_CarryStacker.enabled = true
+BLT_CarryStacker.enabled = false
 
 function val2bool(value)
 	return value == "on"
@@ -108,6 +108,9 @@ function BLT_CarryStacker:IsModEnabled()
 	-- Unable to use the mod after every item was dropped if stealth-only and stealth failed
 	elseif self:IsStealthOnly() and not managers.groupai:state():whisper_mode() and #self.stack == 0 then
 		return false
+	end
+	if LuaNetworking:IsHost() then
+		return true
 	end
 	return self.enabled
 end
